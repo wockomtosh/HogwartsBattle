@@ -1,13 +1,11 @@
 <template>
 <div class="main">
 	<div class="menu">
-		<button @click="leaveGame()">Exit Game</button>
+		<!--<button @click="leaveGame()">Exit Game</button>-->
 		<button @click="saveGame()">Save Game</button>
 	</div>
+
 	<br />
-	<div class="menu">
-		<button @click="endTurn()">End Turn</button>
-	</div>
 
 	<div v-if="won">
 		<h1>You Win!</h1>
@@ -22,17 +20,17 @@
 	<div>
 		<h1>Location</h1>
 		<div class="displayCard">
-			<div class="card">
+			<div class="card location">
 				<h2>Name: {{this.villains.currentLocation}}</h2>
 				<h3>Control: {{this.villains.control}} / 10</h3>
 			</div>
 		</div>
-		<button @click="addControl()">Add Control</button>
-		<button @click="removeControl()">Remove Control</button>
+		<!--<button @click="addControl()">Add Control</button>
+		<button @click="removeControl()">Remove Control</button>-->
 	</div>
 
 	<div class="villainsDisplay">
-		<div>
+		<!--<div>
 			<h1>Dark Arts Cards</h1>
 			<div class="darkArts cards" v-for="card in villains.hand" v-bind:key="card._id">
 				<div class="card">
@@ -40,13 +38,13 @@
 					<p>{{card.description}}</p>
 				</div>
 			</div>
-		</div>
+		</div>-->
 
 		<div>
 			<h1>Villains</h1>
 			<div class="villains cards">
 				<div v-for="villain in villains.activeVillains" v-bind:key="villain._id">
-					<div class="card">
+					<div class="card villain">
 						<h2>{{villain.name}}</h2>
 						<p>{{villain.description}}</p>
 						<h3>AP: {{villain.ap}} / {{villain.hp}}</h3>
@@ -58,24 +56,25 @@
 		</div>
 	</div>
 
+	<br />
 	<h1>Character</h1>
 	<div class="displayCard">
-		<div class="card">
+		<div class="card character">
 			<h2>Name: {{this.character.name}}</h2>
-			<h3>HP: {{character.hp}} / 10</h3>
+			<h3 class="hp">HP: {{character.hp}} / 10</h3>
 			<div class="characterInfo">
-				<h3>Coins: {{this.character.coins}}</h3>
-				<h3>AP: {{this.character.ap}}</h3>
+				<h3 class="coins">Coins: {{this.character.coins}}</h3>
+				<h3 class="ap">AP: {{this.character.ap}}</h3>
 			</div>
 		</div>
-		<div>
+		<!--<div>
 			<button @click="addHP()">Add HP</button>
 			<button @click="removeHP()">Remove HP</button>
 		</div>
 		<div>
 			<button @click="addCoin()">Add Coin</button>
 			<button @click="addAP()">Add AP</button>
-		</div>
+		</div>-->
 	</div>
 
 	<h1>Hand</h1>
@@ -87,10 +86,15 @@
 				<p>{{card.description}}</p>
 				<h3>{{card.cost}}</h3>
 				<button @click="selectCard(card)">Select</button>
+				<p v-if="card == currentCard">Selected</p>
+				<p v-if="!card.canPlay">Played</p>
 			</div>
 		</div>
 	</div>
 	<button @click="playCard()">Play Current Card</button>
+	<div class="menu">
+		<button @click="endTurn()">End Turn</button>
+	</div>
 
 </div>
 </template>
@@ -109,14 +113,10 @@ export default {
 	data() {
 		return {
 			currentCard: null,
-			lost: false,
 		}
 	},
 	created() {
-		if (this.villains.activeVillains.length == 0) {
-			this.revealVillain();
-		}
-		this.revealLocation();
+
 	},
 	computed: {
 		user() {
@@ -125,6 +125,9 @@ export default {
 		won() {
 			return this.villains.villainDeck.length == 0 && this.villains.activeVillains == 0;
 		},
+		lost() {
+			return this.villains.control == 10;
+		}
 	},
 	methods: {
 		selectCard(card) {
@@ -132,10 +135,11 @@ export default {
 		},
 		playCard() {
 			if (this.currentCard) {
-				let effect = this.currentCard.effect;
-				console.log("Activating Effect");
-				console.log(effect);
-				this.activateEffect(effect);
+				if (this.currentCard.canPlay) {
+					let effect = this.currentCard.effect;
+					this.activateEffect(effect);
+					this.currentCard.canPlay = false;
+				}
 			}
 		},
 		activateEffect(effect) {
@@ -202,6 +206,7 @@ export default {
 		discard() {
 			if (this.hand.cards.length > 0) {
 				let card = this.hand.cards.shift(card);
+				card.canPlay = true;
 				this.deck.discardPile.push(card);
 			}
 		},
@@ -212,12 +217,10 @@ export default {
 			}
 		},
 		endTurn() {
-			if (this.villains.control == 10)
-				this.lost = true;
-
 			if (this.character.hp == 0) {
 				this.character.hp = 10;
 			}
+			this.currentCard = null;
 			this.character.ap = 0;
 			this.character.coins = 0;
 			this.discardAll();
@@ -233,6 +236,10 @@ export default {
 
 			this.playDarkArts();
 			this.activateVillains();
+
+			if (this.character.hp == 0) {
+				this.stunned();
+			}
 		},
 		stunned() {
 			this.discard();
@@ -255,11 +262,7 @@ export default {
 
 		playDarkArts() {},
 		activateVillains() {
-			console.log(this.villains.activeVillains);
 			let villain = this.villains.activeVillains[0];
-			console.log(villain);
-			console.log("Activating Effect");
-			console.log(villain.effect);
 			this.activateEffect(villain.effect);
 		},
 		revealVillain() {
@@ -278,8 +281,6 @@ export default {
 			let villain = this.villains.activeVillains[0];
 			if (villain.ap == villain.hp) {
 				this.villains.activeVillains.shift();
-				console.log("Activating Effect");
-				console.log(villain.reward);
 				this.activateEffect(villain.reward);
 			}
 		},
@@ -294,7 +295,24 @@ export default {
 				hp: this.character.hp,
 				coins: this.character.coins,
 				canDraw: this.character.canDraw,
-			})
+			});
+			await axios.put("/api/hands/", {
+				cards: this.hand.cards,
+			});
+			await axios.put("/api/villains/", {
+				locations: this.villains.locations,
+				villainDeck: this.villains.villainDeck,
+				darkArtsDeck: this.villains.darkArtsDeck,
+				hand: this.villains.hand,
+				discard: this.villains.discard,
+				currentLocation: this.villains.currentLocation,
+				control: this.villains.control,
+				activeVillains: this.villains.activeVillains,
+			});
+			await axios.put("/api/decks/", {
+				drawPile: this.deck.drawPile,
+				discardPile: this.deck.discardPile
+			});
 		},
 	}
 }
@@ -310,7 +328,8 @@ h3 {
 
 .menu {
 	display: flex;
-	justify-content: flex-end;
+	justify-content: center;
+	margin-top: 10px;
 }
 
 .menu h2 {
@@ -350,5 +369,34 @@ h3 {
 
 .playable:hover {
 	border: 3px solid;
+}
+
+.villain {
+	color: #DBE4EB;
+	background-color: #4C4C47;
+}
+
+.character {
+	background-color: #539987;
+}
+
+.playable {
+	background-color: #E3E67C;
+}
+
+.location {
+	background-color: #FCBFB7;
+}
+
+.coins {
+	color: #C9AE5D;
+}
+
+.ap {
+	color: #FFDF00;
+}
+
+.hp {
+	color: #8B0000;
 }
 </style>

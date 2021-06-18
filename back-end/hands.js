@@ -27,7 +27,6 @@ router.post('/', async (req, res) => {
 			user: req.body.user._id
 		}).populate('user');
 		if (existingHand) {
-			console.log("already exists");
 			return res.status(403).send({
 				message: "hand for this user already exists"
 			});

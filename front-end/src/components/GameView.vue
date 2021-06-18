@@ -4,11 +4,13 @@
 		<h2>{{user.username}} <a @click="logout"><i class="fas fa-sign-out-alt"></i></a></h2>
 	</div>
 
-	<Game v-if="gameStarted" :hand="hand" :villains="villains" :deck="deck" :character="character" />
-	<div class="gameButtons" v-else>
+	<div class="gameButtons">
 		<button @click="newGame()">New Game</button>
 		<button @click="continueGame()">Continue Game</button>
 	</div>
+
+	<Game v-if="gameStarted" :hand="hand" :villains="villains" :deck="deck" :character="character" />
+
 </div>
 </template>
 
@@ -30,7 +32,10 @@ export default {
 		}
 	},
 	async created() {
-		this.gameStarted = false; //TODO remove this later
+		let character = await axios.get("/api/characters/");
+		if (character)
+			this.continueGame()
+		// this.gameStarted = false; //TODO remove this later
 	},
 	computed: {
 		user() {
@@ -83,51 +88,61 @@ export default {
 						type: "Spell",
 						effect: [0],
 						description: "Gain 1 Coin",
+						canPlay: true
 					}, {
 						name: "Alohamora",
 						type: "Spell",
 						effect: [0],
 						description: "Gain 1 Coin",
+						canPlay: true
 					}, {
 						name: "Alohamora",
 						type: "Spell",
 						effect: [0],
 						description: "Gain 1 Coin",
+						canPlay: true
 					}, {
 						name: "Alohamora",
 						type: "Spell",
 						effect: [0],
 						description: "Gain 1 Coin",
+						canPlay: true
 					}, {
 						name: "Alohamora",
 						type: "Spell",
 						effect: [0],
 						description: "Gain 1 Coin",
+						canPlay: true
 					}, {
 						name: "Alohamora",
 						type: "Spell",
 						effect: [0],
 						description: "Gain 1 Coin",
+						canPlay: true
 					}, {
 						name: "Alohamora",
 						type: "Spell",
 						effect: [0],
 						description: "Gain 1 Coin",
+						canPlay: true
 					}, {
 						name: "Hedwig",
 						type: "Ally",
 						effect: [2, 2],
 						description: "Gain 2 HP",
+						canPlay: true
 					}, {
 						name: "Firebolt",
 						type: "Item",
 						effect: [1],
 						description: "Gain 1 AP",
+						canPlay: true
 					}, {
 						name: "Invisibility Cloak",
 						type: "Item",
 						effect: [1, 2],
 						description: "Gain 1 AP and 1 HP",
+						canPlay: true
 					}]
 				});
 				this.deck = deck.data.deck;
@@ -173,6 +188,11 @@ export default {
 				});
 				this.villains = villains.data.villain;
 
+				if (this.villains.locations.length > 0) {
+					let location = this.villains.locations.shift();
+					this.villains.currentLocation = location;
+				}
+
 				this.gameStarted = true;
 			} catch (error) {
 				console.log(error);
@@ -188,11 +208,15 @@ export default {
 				this.deck = deck.data;
 
 				let character = await axios.get("/api/characters/");
-				console.log(character);
 				this.character = character.data;
 
 				let villains = await axios.get("/api/villains/");
 				this.villains = villains.data;
+
+				if (this.villains.locations.length > 0) {
+					let location = this.villains.locations.shift();
+					this.villains.currentLocation = location;
+				}
 
 				this.gameStarted = true;
 			} catch (error) {
