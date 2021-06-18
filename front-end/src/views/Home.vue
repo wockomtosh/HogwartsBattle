@@ -1,12 +1,12 @@
 <template>
 <div class="home">
 	<h2>Welcome to Hogwarts Battle!</h2>
-	<p>This is a stripped down version of Hogwarts Battle, a cooperative deck building game.
+	<p class="intro">This is a stripped down version of Hogwarts Battle, a cooperative deck building game.
 		Unfortunately, I don't have the time to make a fully-featured version of this game.
 		However, this game is fully playable, and although it's a bit easy and overly simplified,
 		it will suffice for this project.
 	</p>
-	<ul>
+	<ul class="intro list">
 		<li>First, you need to create an account. You can use any username
 			and password that hasn't already been taken.</li>
 		<li>Second, press the "New Game" button. This will generate a new game
@@ -39,5 +39,20 @@ export default {
 p,
 li {
 	text-align: left;
+}
+
+.intro {
+	margin: 0 auto;
+	width: 60%;
+}
+
+.list {
+	margin: 20px auto;
+}
+
+li {
+	margin: 0 auto;
+	width: 70%;
+	padding-bottom: 20px;
 }
 </style>

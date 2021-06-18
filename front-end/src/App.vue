@@ -9,7 +9,7 @@
 	</header>
 	<router-view />
 	<div class="footer">
-		<p><a href="https://github.com/wockomtosh/HogwartsBattle">https://github.com/wockomtosh/HogwartsBattle</a></p>
+		<p><a href="https://github.com/wockomtosh/HogwartsBattle">https://github.com/wockomtosh/HogwartsBattle 15 Hours</a></p>
 	</div>
 </div>
 </template>
